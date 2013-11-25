@@ -1,4 +1,4 @@
-# Maintainer: Your Name <youremail@domain.com>
+# Maintainer: Keith Hughitt <khughitt@umd.edu>
 pkgname=shiny-server-git
 pkgver=20131125
 pkgrel=1
