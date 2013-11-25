@@ -35,28 +35,53 @@ build() {
 
   # Build shiny-server
   cd "$srcdir/$_gitname-build"
+
+  # Create a temporary directory to perform build in
   mkdir tmp
   cd tmp
 
+  # Work-around: move python2 to front of PATH
+  # See: https://github.com/joyent/node/issues/5302
+  if [ ! -d "/tmp/bin" ]; then
+      mkdir /tmp/bin
+  fi
+
+  if [ ! -L "/tmp/bin/python" ]; then
+    ln -s /usr/bin/python2 /tmp/bin/python
+  fi
+
+  export PATH=/tmp/bin:$PATH
+
+  # For other parts of installation that do respect PYTHON setting
   PYTHON=`which python2`
+
+  msg "Running CMake"
   cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DPYTHON="$PYTHON" ../
+  msg "Running Make"
   make
+
+  # Remove python symlink
+  rm /tmp/bin/python
+
+  # Fix scripts that hard-code python location
+  # find .. -name "*.py" -print | xargs sed -i \
+  # 's/\/usr\/bin\/env python$/\/usr\/bin\/env python2/g'
   mkdir ../build
 }
 
 package() {
   # Install shiny (@TODO: create separate package)
-  R -e \\"install.packages('shiny', repos='http://cran.rstudio.com/')\\"
+  msg "Installing shiny R package"
+  R -e "install.packages('shiny', repos='http://cran.rstudio.com/')"
 
   # Get dependencies from npm
+  msg "Installing Node.js dependencies"
   cd "$srcdir/$_gitname-build"
-
   PYTHON=`which python2`
   bin/npm --python="$PYTHON" install
 
-  # Fix scripts that hard-code python location
-  find . -name "*.py" -print | xargs sed -i 's/\/usr\/bin\/env python$/\/usr\/bin\/env python2/g'
-
   # Install shiny-server
+  msg "Installing Shiny Server"
+  cd tmp
   make DESTDIR="$pkgdir/" install
 }

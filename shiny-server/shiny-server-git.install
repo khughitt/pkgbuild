@@ -1,21 +1,23 @@
 post_install() {
+    # Create shortcut to shiny-server executable
+    ln -fs /usr/local/shiny-server/bin/shiny-server /usr/bin/shiny-server
 
-# Create shortcut to shiny-server executable
-ln -s /usr/local/shiny-server/bin/shiny-server /usr/bin/shiny-server
+    # Create shiny user.
+    if ! id -u shiny >/dev/null 2>&1;
+        echo 'Creating user "shiny"'
+        useradd -r -m shiny
+    fi
 
-# Create shiny user.
-useradd -r -m shiny
+    # Create log, config, and application directories
+    mkdir -p /var/log/shiny-server
+    mkdir -p /srv/shiny-server
+    mkdir -p /var/lib/shiny-server
+    mkdir -p /etc/shiny-server
 
-# Create log, config, and application directories
-mkdir -p /var/log/shiny-server
-mkdir -p /srv/shiny-server
-mkdir -p /var/lib/shiny-server
-mkdir -p /etc/shiny-server
+    # Make shiny owner of shiny log directory
+    chown shiny /var/log/shiny-server
 
-# Make shiny owner of shiny log directory
-chown shiny /var/log/shiny-server
-
-cat << _EOF
+    cat << _EOF
 
 ==> Shiny Server installation notes:
 ---------------------------------------------------
@@ -25,19 +27,14 @@ cat << _EOF
     usage, see:
 
     https://github.com/rstudio/shiny-server
+
 _EOF
 }
 
 post_remove() {
-# Remove shortcut
-rm /usr/bin/shiny-server
+    # Remove shortcut
+    rm -f /usr/bin/shiny-server
 
-#Create shiny user
-userdel shiny
-
-# Remove shiny directories
-rmdir /var/log/shiny-server
-rmdir /srv/shiny-server
-rmdir /var/lib/shiny-server
-rmdir /etc/shiny-server
+    # remove temporary sockets
+    rm -rf /var/shiny-server/sockets
 }
