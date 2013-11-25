@@ -3,7 +3,7 @@ post_install() {
     ln -fs /usr/local/shiny-server/bin/shiny-server /usr/bin/shiny-server
 
     # Create shiny user.
-    if ! id -u shiny >/dev/null 2>&1;
+    if ! id -u shiny >/dev/null 2>&1; then
         echo 'Creating user "shiny"'
         useradd -r -m shiny
     fi
