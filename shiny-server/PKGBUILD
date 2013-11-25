@@ -1,0 +1,62 @@
+# Maintainer: Your Name <youremail@domain.com>
+pkgname=shiny-server-git
+pkgver=20131125
+pkgrel=1
+pkgdesc="Host Shiny applications over the web."
+arch=('i686' 'x86_64')
+url="http://www.rstudio.com/shiny/server"
+license=('AGPLv3')
+depends=('python2' 'r' 'nodejs')
+makedepends=('cmake' 'gcc' 'git')
+install="${pkgname}.install"
+conflicts=('shiny-server')
+
+_gitroot=https://github.com/rstudio/shiny-server
+_gitname=shiny-server
+
+build() {
+  cd "$srcdir"
+
+  # Fetch from Github
+  msg "Connecting to GIT server...."
+
+  if [[ -d "$_gitname" ]]; then
+    cd "$_gitname" && git pull origin
+    msg "The local files are updated."
+  else
+    git clone "$_gitroot" "$_gitname"
+  fi
+
+  msg "GIT checkout done or server timeout"
+  msg "Starting build..."
+
+  rm -rf "$srcdir/$_gitname-build"
+  git clone "$srcdir/$_gitname" "$srcdir/$_gitname-build"
+
+  # Build shiny-server
+  cd "$srcdir/$_gitname-build"
+  mkdir tmp
+  cd tmp
+
+  PYTHON=`which python2`
+  cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DPYTHON="$PYTHON" ../
+  make
+  mkdir ../build
+}
+
+package() {
+  # Install shiny (@TODO: create separate package)
+  R -e \\"install.packages('shiny', repos='http://cran.rstudio.com/')\\"
+
+  # Get dependencies from npm
+  cd "$srcdir/$_gitname-build"
+
+  PYTHON=`which python2`
+  bin/npm --python="$PYTHON" install
+
+  # Fix scripts that hard-code python location
+  find . -name "*.py" -print | xargs sed -i 's/\/usr\/bin\/env python$/\/usr\/bin\/env python2/g'
+
+  # Install shiny-server
+  make DESTDIR="$pkgdir/" install
+}
