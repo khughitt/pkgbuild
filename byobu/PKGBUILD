@@ -6,29 +6,27 @@
 # Contributor: Adrian C. <anrxc..sysphere.org>
 
 pkgname=byobu
-pkgver=5.39
+pkgver=5.64
 pkgrel=1
 pkgdesc="Enhanced profile and useful notifications for tmux/screen"
 arch=("any")
 url="https://launchpad.net/byobu"
 license=("GPL3")
-depends=("libnewt" "python2" "tmux")
+depends=("libnewt" "python" "tmux")
 makedepends=("gettext")
-optdepends=("screen")
-install="${pkgname}.install"
-source=("${url}/trunk/${pkgver}/+download/${pkgname}_${pkgver}.orig.tar.gz"
-        "statusrc")
-md5sums=('4542386e6113a75b52f4c2777e12d0aa'
-         '114937599258f95d608fc6b459c0aaff')
+optdepends=("screen: alternative back-end for byobu (default: tmux)"
+            "python2: needed for byobu-config")
+source=("${url}/trunk/${pkgver}/+download/${pkgname}_${pkgver}.orig.tar.gz")
+md5sums=('c928f18fff2252e124c18116a11fe631')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
 
-  # fix python -> python2
-  #grep -rH 'usr/bin/env python' . | cut -d: -f1 | xargs -n1 sed -re 's;^#!/usr/bin/env python$;#!/usr/bin/env python2;' -i
-
   # arch-specific screens dir
   sed -re 's;^SOCKETDIR=.+$;SOCKETDIR="/tmp/screens";' -i etc/byobu/socketdir
+
+  # use python2 for byobu-config until python3 bindings for newt are available
+  sed -i "s:env python:env python2:" usr/bin/byobu-config
 
   ./configure --prefix=/usr --sysconfdir=/etc
   make
@@ -37,7 +35,4 @@ build() {
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   make install DESTDIR="$pkgdir"
-
-  # Install custom configuration for arch
-  install -D -m644 ${srcdir}/statusrc "${pkgdir}/usr/share/${pkgname}/status/"
 }
