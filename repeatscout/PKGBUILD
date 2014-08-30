@@ -24,10 +24,10 @@ build() {
 package() {
   cd "$srcdir"/RepeatScout-1
   install -d "${pkgdir}"/usr/lib/
-  make install INSTDIR=${pkgdir}/usr/lib/RepeatScout-${pkgver}
+  make install INSTDIR=${pkgdir}/usr/lib/RepeatScout
 
   install -d "${pkgdir}"/usr/bin
-  ln -sf /usr/lib/RepeatScout-${pkgver}/RepeatScout "${pkgdir}"/usr/bin/RepeatScout
-  ln -sf /usr/lib/RepeatScout-${pkgver}/build_lmer_table "${pkgdir}"/usr/bin/build_lmer_table
+  ln -sf /usr/lib/RepeatScout/RepeatScout "${pkgdir}"/usr/bin/RepeatScout
+  ln -sf /usr/lib/RepeatScout/build_lmer_table "${pkgdir}"/usr/bin/build_lmer_table
 }
 
