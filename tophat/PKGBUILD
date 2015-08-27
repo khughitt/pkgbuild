@@ -1,7 +1,7 @@
 # Maintainer: Keith Hughitt <khughitt@umd.edu>
 # Contributor: Thiago Yukio Kikuchi Oliveira <stratust at gmail dot com>
 pkgname=tophat
-pkgver=2.0.12
+pkgver=2.0.13
 pkgrel=1
 pkgdesc="TopHat is a fast splice junction mapper for RNA-Seq reads."
 arch=('x86_64' 'i686')
@@ -9,7 +9,7 @@ url="http://tophat.cbcb.umd.edu"
 license=('custom')
 depends=('boost' 'python2' 'samtools' 'bowtie2' 'perl')
 source=(http://ccb.jhu.edu/software/tophat/downloads/$pkgname-$pkgver.tar.gz)
-md5sums=('b419604b45d94f6e878a141f05dd1d75')
+md5sums=('df5c22c85d7c631ee37f61e91f81ae4d')
 
 build() {
   # Tophat use python2 but archlinux uses python3 as default python
@@ -19,6 +19,7 @@ build() {
 
   cd $srcdir/$pkgname-$pkgver
 
+  export CC=$(which gcc-4.4)
   export LDFLAGS="-lboost_system"
   export MAKEFLAGS="-j1"
 

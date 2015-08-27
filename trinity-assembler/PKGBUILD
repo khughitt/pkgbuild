@@ -1,0 +1,28 @@
+# Maintainer: Keith Hughitt <khughitt@umd.edu>
+pkgname=trinity-assembler
+pkgver=2.0.6
+pkgrel=1
+pkgdesc="RNA-Seq De novo Assembler"
+arch=('i686' 'x86_64')
+url="http://trinityrnaseq.github.io/"
+license=('custom')
+depends=('java-runtime' 'bowtie' 'samtools')
+
+source=("https://github.com/trinityrnaseq/trinityrnaseq/archive/v${pkgver}.tar.gz")
+md5sums=('a155347cd4bf53eef1173abd2d829da0')
+
+build() {
+  cd "$srcdir"/trinityrnaseq-$pkgver
+
+  ./configure --prefix=/usr 
+  make
+  make plugins
+}
+
+package() {
+  cd "$srcdir"/trinityrnaseq-$pkgver
+  make install
+
+  install -D LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
+
